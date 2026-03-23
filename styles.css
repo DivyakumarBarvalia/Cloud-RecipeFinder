@@ -2,49 +2,59 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-    background: linear-gradient(to bottom, #eaf4ff, #ffffff);
+    min-height: 100vh;
+    background: linear-gradient(180deg, #d9ecfc 0%, #edf5fd 35%, #f7fbff 100%);
+    color: #163b62;
 }
 
 /* HEADER */
 header {
     display: flex;
     justify-content: space-between;
-    padding: 20px 50px;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    align-items: center;
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(180deg, #fefefe 0%, #f3f9ff 100%);
+    border-bottom: 1px solid #d7e7f7;
 }
 
 .logo {
     font-size: 22px;
     font-weight: bold;
-    color: #2a6edb;
+    color: #1660a7;
 }
 
 nav a {
     margin-left: 20px;
     text-decoration: none;
-    color: #2a6edb;
+    color: #1d5b9a;
     font-weight: bold;
 }
 
 /* HERO */
 .hero {
     text-align: center;
-    padding: 80px 20px;
+    width: min(760px, 94vw);
+    margin: 22px auto 0;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 26px;
+    box-shadow: 0 12px 30px rgba(22, 73, 124, 0.12);
 }
 
 .hero h1 {
-    font-size: 36px;
-    color: #2a6edb;
+    font-size: 34px;
+    color: #1f4f84;
 }
 
 .hero p {
     font-size: 18px;
-    margin-bottom: 20px;
+    margin: 12px 0 24px;
+    color: #466a8d;
 }
 
 .search-bar {
@@ -55,17 +65,19 @@ nav a {
 .search-bar input {
     padding: 12px;
     width: 300px;
-    border: 1px solid #ccc;
+    border: 1px solid #c9ddf1;
     border-radius: 8px 0 0 8px;
+    background: #f8fcff;
 }
 
 .search-bar button {
     padding: 12px 20px;
     border: none;
-    background: #2a6edb;
+    background: linear-gradient(180deg, #2f94ea 0%, #0f67bd 100%);
     color: white;
     border-radius: 0 8px 8px 0;
     cursor: pointer;
+    font-weight: 600;
 }
 
 /* CARDS */
@@ -97,49 +109,88 @@ nav a {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 24px;
 }
 
 .form-container {
     background: white;
-    padding: 40px;
-    border-radius: 15px;
-    width: 350px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 28px 26px 24px;
+    border-radius: 14px;
+    width: min(380px, 92vw);
+    box-shadow: 0 14px 28px rgba(20, 69, 116, 0.18);
+    border: 1px solid #dbe9f7;
     text-align: center;
 }
 
 .form-container h1 {
-    margin-bottom: 20px;
-    color: #2a6edb;
+    margin-bottom: 18px;
+    color: #1f4f84;
+    font-size: 24px;
 }
 
 .form-container input {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    border-radius: 6px;
+    border: 1px solid #d0dfef;
+    background: #fbfdff;
 }
 
 .form-container button {
     width: 100%;
     padding: 12px;
     margin-top: 10px;
-    background: #2a6edb;
+    background: linear-gradient(180deg, #2f94ea 0%, #0f67bd 100%);
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 20px;
+    line-height: 1.1;
+    font-weight: 700;
 }
 
 .options {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
+    margin: 4px 0 10px;
+    color: #587796;
 }
 
 .form-container a {
-    color: #2a6edb;
+    color: #1b63ac;
     text-decoration: none;
+    font-weight: 600;
+}
+
+.logo-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1768b5;
+    letter-spacing: 0.1px;
+}
+
+.logo-icon {
+    filter: drop-shadow(0 1px 0 #ffffff);
+}
+
+.logo-form {
+    margin: 4px 0 14px;
+    font-size: 22px;
+}
+
+.home-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-page .hero {
+    margin: auto auto;
 }
