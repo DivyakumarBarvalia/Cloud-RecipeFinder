@@ -35,15 +35,25 @@ nav a {
     font-weight: bold;
 }
 
+/* HOME MAIN */
+.home-main {
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 20px 48px;
+    flex: 1;
+}
+
 /* HERO */
 .hero {
     text-align: center;
-    width: min(760px, 94vw);
+    width: min(760px, 100%);
     margin: 22px auto 0;
     background: #ffffff;
     border-radius: 16px;
     padding: 36px 26px;
     box-shadow: 0 12px 30px rgba(22, 73, 124, 0.12);
+    border: 1px solid #e8f2fb;
 }
 
 .hero h1 {
@@ -80,7 +90,7 @@ nav a {
     font-weight: 600;
 }
 
-/* CARDS */
+/* CARDS (legacy) */
 .recipes, .categories {
     padding: 40px;
 }
@@ -102,6 +112,166 @@ nav a {
 
 .card.small {
     max-width: 150px;
+}
+
+/* POPULAR & BROWSE SECTIONS */
+.popular-section,
+.browse-section {
+    margin-top: 28px;
+    padding: 28px 24px 32px;
+    background: linear-gradient(165deg, #ffffff 0%, #f4f9ff 55%, #eef6fd 100%);
+    border-radius: 16px;
+    border: 1px solid #dbe8f5;
+    box-shadow: 0 8px 24px rgba(22, 73, 124, 0.08);
+}
+
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.section-head h2,
+.browse-section > h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f4f84;
+}
+
+.browse-section > h2 {
+    margin-bottom: 22px;
+    text-align: center;
+}
+
+.section-link {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1b63ac;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.section-link:hover {
+    text-decoration: underline;
+}
+
+.recipe-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.recipe-card {
+    flex: 0 0 min(220px, 78vw);
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #d7e7f7;
+    box-shadow: 0 4px 14px rgba(22, 73, 124, 0.1);
+    text-align: left;
+}
+
+.recipe-card-image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e1f0ff 0%, #cfe4f9 100%);
+}
+
+.recipe-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.recipe-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f4f84;
+    padding: 12px 14px 14px;
+    margin: 0;
+}
+
+.section-cta {
+    text-align: center;
+    margin-top: 22px;
+}
+
+.btn-outline {
+    padding: 10px 28px;
+    border: 2px solid #2f94ea;
+    background: #fff;
+    color: #0f67bd;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(47, 148, 234, 0.2);
+}
+
+.btn-outline:hover {
+    background: linear-gradient(180deg, #f0f7ff 0%, #e1f0ff 100%);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+    .category-grid {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: none;
+    }
+}
+
+.category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 22px 12px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #d7e7f7;
+    text-decoration: none;
+    color: #1f4f84;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(22, 73, 124, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.category-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(22, 73, 124, 0.14);
+}
+
+.category-icon {
+    font-size: 2rem;
+    line-height: 1;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #e8f4ff 0%, #d4e9fb 100%);
+    border-radius: 50%;
+    border: 2px solid #b8d9f5;
+}
+
+.category-label {
+    text-align: center;
 }
 
 /* FORMS */
@@ -192,5 +362,5 @@ nav a {
 }
 
 .home-page .hero {
-    margin: auto auto;
+    margin: 22px auto 0;
 }
