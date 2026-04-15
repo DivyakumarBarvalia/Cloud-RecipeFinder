@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Cloud Recipe Finder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+
+    <div class="auth-card">
+        <div class="auth-card-top">
+            <h1>Cloud Recipe Finder</h1>
+        </div>
+        <div class="auth-card-body">
+            <h2>Create Your Account</h2>
+            <form id="registerForm">
+                <div class="field-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="field-group">
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="field-group password-wrapper">
+                    <input type="password" id="password" placeholder="Create Password" required>
+                    <button type="button" class="toggle-password" data-target="password">Show</button>
+                </div>
+                <div class="field-group password-wrapper">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    <button type="button" class="toggle-password" data-target="confirmPassword">Show</button>
+                </div>
+                <button type="submit" class="btn btn-solid submit-btn">Sign Up</button>
+            </form>
+            <div id="message" class="message"></div>
+            <div class="auth-footer">
+                Already have an account? <a href="login.html">Login</a><br><br>
+                <a href="home.html" style="font-weight: 500;">&larr; Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.toggle-password').forEach((button) => {
+            button.addEventListener('click', () => {
+                const targetInput = document.getElementById(button.dataset.target);
+                const isPassword = targetInput.type === 'password';
+                targetInput.type = isPassword ? 'text' : 'password';
+                button.textContent = isPassword ? 'Hide' : 'Show';
+            });
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageElement = document.getElementById('message');
+
+            if (password !== confirmPassword) {
+                messageElement.className = 'message error';
+                messageElement.innerText = 'Passwords do not match.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageElement.className = 'message success';
+                    messageElement.innerText = 'Registration successful! Redirecting to login...';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    messageElement.className = 'message error';
+                    messageElement.innerText = data.error || 'Registration failed.';
+                }
+            } catch (error) {
+                messageElement.className = 'message error';
+                messageElement.innerText = 'Network error. Is the backend running?';
+            }
+        });
+    </script>
+</body>
+</html>
