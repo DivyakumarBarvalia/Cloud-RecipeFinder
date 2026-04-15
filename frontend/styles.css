@@ -39,6 +39,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 
 .logo {
@@ -58,6 +59,29 @@ header {
     font-size: 0.98rem;
     font-weight: 700;
     cursor: pointer;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.header-welcome {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.header-username {
+    display: none;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .btn-outline {
@@ -82,6 +106,10 @@ header {
 
 #user-menu,
 #auth-links {
+    display: none;
+}
+
+#signout-btn {
     display: none;
 }
 
@@ -275,6 +303,15 @@ header {
 
     header {
         padding: 0.8rem 1rem;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .header-welcome {
+        position: static;
+        transform: none;
+        text-align: center;
+        white-space: normal;
     }
 
     .hero h2 {

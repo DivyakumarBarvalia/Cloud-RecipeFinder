@@ -52,13 +52,13 @@
                 const response = await fetch('/api/login', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ identifier, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    localStorage.setItem('currentUser', data.username);
                     window.location.href = 'home.html';
                 } else {
                     messageElement.className = 'message error';

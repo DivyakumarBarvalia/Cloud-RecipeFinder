@@ -11,9 +11,12 @@
     <div class="app-container">
         <header>
             <h1 class="logo">Cloud Recipe Finder</h1>
+            <p id="welcome-text" class="header-welcome">Welcome to Cloud Recipe Finder!</p>
             <div class="nav-buttons">
-                <a href="login.html" class="btn-outline">Login</a>
-                <a href="register.html" class="btn-solid">Register</a>
+                <a href="login.html" class="btn-outline" id="login-link">Login</a>
+                <a href="register.html" class="btn-solid" id="register-link">Register</a>
+                <span id="header-username" class="header-username"></span>
+                <button class="btn btn-outline" id="signout-btn" type="button">Sign Out</button>
             </div>
         </header>
 
@@ -53,5 +56,66 @@
         </main>
     </div>
 
+    <script>
+        const loginLink = document.getElementById('login-link');
+        const registerLink = document.getElementById('register-link');
+        const signoutBtn = document.getElementById('signout-btn');
+        const welcomeText = document.getElementById('welcome-text');
+        const headerUsername = document.getElementById('header-username');
+
+        function setAuthenticatedUI(username) {
+            welcomeText.innerText = `Welcome back to Cloud Recipe Finder, ${username}!`;
+            loginLink.style.display = 'none';
+            registerLink.style.display = 'none';
+            headerUsername.style.display = 'inline-block';
+            headerUsername.innerText = username;
+            signoutBtn.style.display = 'inline-block';
+        }
+
+        function setGuestUI() {
+            welcomeText.innerText = 'Welcome to Cloud Recipe Finder!';
+            loginLink.style.display = 'inline-block';
+            registerLink.style.display = 'inline-block';
+            headerUsername.style.display = 'none';
+            headerUsername.innerText = '';
+            signoutBtn.style.display = 'none';
+        }
+
+        async function loadSession() {
+            try {
+                const response = await fetch('/api/session', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    setGuestUI();
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.authenticated) {
+                    setAuthenticatedUI(data.username);
+                } else {
+                    setGuestUI();
+                }
+            } catch (error) {
+                setGuestUI();
+            }
+        }
+
+        signoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } finally {
+                setGuestUI();
+            }
+        });
+
+        loadSession();
+    </script>
 </body>
 </html>
