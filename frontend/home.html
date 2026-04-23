@@ -28,33 +28,68 @@
             <div class="search-card">
                 <h3>Find Your Next Meal</h3>
                 <p>Enter ingredients from your fridge to discover tasty options.</p>
-                <input type="text" placeholder="e.g., chicken, rice, broccoli" disabled>
-                <button class="btn btn-solid" disabled>Search Recipes</button>
-                <p class="muted-note">*Search functionality coming in Milestone 3</p>
-            </div>
-            <section class="category-section">
-                <h3>Browse by Category</h3>
-                <div class="category-grid">
-                    <article class="category-card">
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80" alt="Healthy salad bowl">
-                        <h4>Healthy</h4>
-                    </article>
-                    <article class="category-card">
-                        <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80" alt="Dessert cake slices">
-                        <h4>Desserts</h4>
-                    </article>
-                    <article class="category-card">
-                        <img src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=600&q=80" alt="Quick stir fry dish">
-                        <h4>Quick & Easy</h4>
-                    </article>
-                    <article class="category-card">
-                        <img src="https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=600&q=80" alt="Dinner meal plates">
-                        <h4>Dinner</h4>
-                    </article>
+                <div class="search-row">
+                    <input id="ingredients-input" type="text" placeholder="e.g., chicken, rice, broccoli">
+                    <button class="btn btn-solid" id="search-btn" type="button">Search Recipes</button>
                 </div>
+                <p class="muted-note">Tip: Separate ingredients with commas.</p>
+                <p class="message" id="search-message"></p>
+            </div>
+
+            <section class="category-section">
+                <h3>Search Results</h3>
+                <div id="results-grid" class="category-grid"></div>
+            </section>
+
+            <section class="category-section">
+                <h3>My Favorites</h3>
+                <div id="favorites-grid" class="category-grid"></div>
+            </section>
+
+            <section id="recipe-details" class="details-card hidden">
+                <h3 id="details-title"></h3>
+                <img id="details-image" src="" alt="Recipe image">
+                <p id="details-summary" class="details-summary"></p>
+                <h4>Instructions</h4>
+                <ol id="details-instructions"></ol>
+                <h4>Nutrition</h4>
+                <ul id="details-nutrition"></ul>
+            </section>
+
+            <section id="comments-section" class="details-card hidden">
+                <h3>Reviews & Comments</h3>
+                <div id="comment-form-wrapper">
+                    <textarea id="comment-input" rows="3" placeholder="Write your review..."></textarea>
+                    <div class="comment-controls">
+                        <label for="rating-input">Rating:</label>
+                        <select id="rating-input">
+                            <option value="5">5</option>
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1</option>
+                        </select>
+                        <button id="post-comment-btn" class="btn btn-solid" type="button">Post Comment</button>
+                    </div>
+                    <p id="comment-message" class="message"></p>
+                </div>
+                <div id="comments-list"></div>
             </section>
         </main>
     </div>
+
+    <template id="recipe-card-template">
+        <article class="category-card">
+            <img class="recipe-image" src="" alt="Recipe image">
+            <div class="recipe-body">
+                <h4 class="recipe-title"></h4>
+                <div class="recipe-actions">
+                    <button class="btn btn-outline view-details-btn" type="button">View Details</button>
+                    <button class="btn btn-solid favorite-btn" type="button">Save Favorite</button>
+                </div>
+            </div>
+        </article>
+    </template>
 
     <script>
         const loginLink = document.getElementById('login-link');
@@ -62,6 +97,28 @@
         const signoutBtn = document.getElementById('signout-btn');
         const welcomeText = document.getElementById('welcome-text');
         const headerUsername = document.getElementById('header-username');
+        const ingredientsInput = document.getElementById('ingredients-input');
+        const searchBtn = document.getElementById('search-btn');
+        const resultsGrid = document.getElementById('results-grid');
+        const favoritesGrid = document.getElementById('favorites-grid');
+        const searchMessage = document.getElementById('search-message');
+        const cardTemplate = document.getElementById('recipe-card-template');
+        const recipeDetailsSection = document.getElementById('recipe-details');
+        const detailsTitle = document.getElementById('details-title');
+        const detailsImage = document.getElementById('details-image');
+        const detailsSummary = document.getElementById('details-summary');
+        const detailsInstructions = document.getElementById('details-instructions');
+        const detailsNutrition = document.getElementById('details-nutrition');
+        const commentsSection = document.getElementById('comments-section');
+        const commentInput = document.getElementById('comment-input');
+        const ratingInput = document.getElementById('rating-input');
+        const postCommentBtn = document.getElementById('post-comment-btn');
+        const commentsList = document.getElementById('comments-list');
+        const commentMessage = document.getElementById('comment-message');
+
+        let currentUser = null;
+        let activeRecipeId = null;
+        const favoritesMap = new Map();
 
         function setAuthenticatedUI(username) {
             welcomeText.innerText = `Welcome back to Cloud Recipe Finder, ${username}!`;
@@ -79,28 +136,361 @@
             headerUsername.style.display = 'none';
             headerUsername.innerText = '';
             signoutBtn.style.display = 'none';
+            currentUser = null;
         }
 
-        async function loadSession() {
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, options);
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const message = data.error || 'Request failed.';
+                throw new Error(message);
+            }
+            return data;
+        }
+
+        function clearNode(node) {
+            while (node.firstChild) {
+                node.removeChild(node.firstChild);
+            }
+        }
+
+        function stripHtml(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html || '', 'text/html');
+            return doc.body.textContent || '';
+        }
+
+        async function loadSessionAndUser() {
             try {
-                const response = await fetch('/api/session', {
+                const sessionResponse = await fetch('/api/session', {
                     method: 'GET',
                     credentials: 'include'
                 });
-
-                if (!response.ok) {
+                if (!sessionResponse.ok) {
                     setGuestUI();
                     return;
                 }
-
-                const data = await response.json();
-                if (data.authenticated) {
-                    setAuthenticatedUI(data.username);
-                } else {
+                const sessionData = await sessionResponse.json();
+                if (!sessionData.authenticated) {
                     setGuestUI();
+                    return;
                 }
+                const me = await fetchJson('/api/me', { credentials: 'include' });
+                currentUser = me;
+                setAuthenticatedUI(me.username);
             } catch (error) {
                 setGuestUI();
+            }
+        }
+
+        function renderRecipeCard(recipe, { inFavorites = false } = {}) {
+            const card = cardTemplate.content.firstElementChild.cloneNode(true);
+            const image = card.querySelector('.recipe-image');
+            const title = card.querySelector('.recipe-title');
+            const viewBtn = card.querySelector('.view-details-btn');
+            const favoriteBtn = card.querySelector('.favorite-btn');
+
+            image.src = recipe.image || '';
+            image.alt = recipe.title || 'Recipe';
+            title.innerText = recipe.title || 'Untitled Recipe';
+            viewBtn.addEventListener('click', () => loadRecipeDetails(recipe.id));
+
+            if (inFavorites) {
+                favoriteBtn.innerText = 'Remove Favorite';
+                favoriteBtn.addEventListener('click', () => removeFavorite(recipe.id));
+            } else {
+                favoriteBtn.innerText = favoritesMap.has(recipe.id) ? 'Saved' : 'Save Favorite';
+                favoriteBtn.disabled = favoritesMap.has(recipe.id);
+                favoriteBtn.addEventListener('click', () => saveFavorite(recipe));
+            }
+
+            return card;
+        }
+
+        async function runSearch() {
+            const ingredients = ingredientsInput.value.trim();
+            if (!ingredients) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = 'Please enter at least one ingredient.';
+                return;
+            }
+
+            searchBtn.disabled = true;
+            searchMessage.className = 'message';
+            searchMessage.innerText = 'Searching recipes...';
+            try {
+                const data = await fetchJson(`/api/recipes/search?ingredients=${encodeURIComponent(ingredients)}&number=12`, {
+                    credentials: 'include'
+                });
+                clearNode(resultsGrid);
+                data.recipes.forEach((recipe) => {
+                    resultsGrid.appendChild(renderRecipeCard(recipe));
+                });
+                searchMessage.className = 'message success';
+                searchMessage.innerText = data.recipes.length
+                    ? `Found ${data.recipes.length} recipe(s).`
+                    : 'No recipes found for those ingredients.';
+            } catch (error) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = error.message;
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        async function loadFavorites() {
+            clearNode(favoritesGrid);
+            favoritesMap.clear();
+            if (!currentUser) {
+                favoritesGrid.innerHTML = '<p class="muted-note">Login to save favorites.</p>';
+                return;
+            }
+
+            try {
+                const data = await fetchJson('/api/favorites', { credentials: 'include' });
+                data.favorites.forEach((favorite) => {
+                    favoritesMap.set(favorite.recipe_id, favorite);
+                    favoritesGrid.appendChild(renderRecipeCard({
+                        id: favorite.recipe_id,
+                        title: favorite.recipe_title,
+                        image: favorite.recipe_image
+                    }, { inFavorites: true }));
+                });
+
+                if (!data.favorites.length) {
+                    favoritesGrid.innerHTML = '<p class="muted-note">No favorites yet.</p>';
+                }
+            } catch (error) {
+                favoritesGrid.innerHTML = `<p class="error">${error.message}</p>`;
+            }
+        }
+
+        async function saveFavorite(recipe) {
+            if (!currentUser) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = 'Please login first to save favorites.';
+                return;
+            }
+            try {
+                await fetchJson('/api/favorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        recipeId: recipe.id,
+                        recipeTitle: recipe.title,
+                        recipeImage: recipe.image
+                    })
+                });
+                await loadFavorites();
+                await runSearch();
+            } catch (error) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = error.message;
+            }
+        }
+
+        async function removeFavorite(recipeId) {
+            try {
+                await fetchJson(`/api/favorites/${recipeId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                await loadFavorites();
+            } catch (error) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = error.message;
+            }
+        }
+
+        async function loadRecipeDetails(recipeId) {
+            try {
+                const data = await fetchJson(`/api/recipes/${recipeId}`, { credentials: 'include' });
+                activeRecipeId = recipeId;
+                const recipe = data.recipe;
+                detailsTitle.innerText = recipe.title || 'Recipe';
+                detailsImage.src = recipe.image || '';
+                detailsSummary.innerText = stripHtml(recipe.summary).slice(0, 380);
+                clearNode(detailsInstructions);
+                clearNode(detailsNutrition);
+
+                const instructionSteps = recipe.analyzedInstructions && recipe.analyzedInstructions[0]
+                    ? recipe.analyzedInstructions[0].steps
+                    : [];
+                if (instructionSteps.length) {
+                    instructionSteps.forEach((step) => {
+                        const li = document.createElement('li');
+                        li.innerText = step.step;
+                        detailsInstructions.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.innerText = stripHtml(recipe.instructions || 'No step-by-step instructions provided.');
+                    detailsInstructions.appendChild(li);
+                }
+
+                if (data.nutrition && Array.isArray(data.nutrition.nutrients)) {
+                    data.nutrition.nutrients.slice(0, 8).forEach((nutrient) => {
+                        const li = document.createElement('li');
+                        li.innerText = `${nutrient.name}: ${nutrient.amount}`;
+                        detailsNutrition.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.innerText = 'Nutrition data unavailable for this recipe.';
+                    detailsNutrition.appendChild(li);
+                }
+
+                recipeDetailsSection.classList.remove('hidden');
+                commentsSection.classList.remove('hidden');
+                loadComments(recipeId);
+            } catch (error) {
+                searchMessage.className = 'message error';
+                searchMessage.innerText = error.message;
+            }
+        }
+
+        function canManageComment(comment) {
+            if (!currentUser) {
+                return false;
+            }
+            return currentUser.role === 'admin' || Number(comment.user_id) === Number(currentUser.id);
+        }
+
+        async function loadComments(recipeId) {
+            clearNode(commentsList);
+            try {
+                const data = await fetchJson(`/api/recipes/${recipeId}/comments`, { credentials: 'include' });
+                if (!data.comments.length) {
+                    commentsList.innerHTML = '<p class="muted-note">No comments yet. Be the first to review!</p>';
+                    return;
+                }
+
+                data.comments.forEach((comment) => {
+                    const card = document.createElement('article');
+                    card.className = 'comment-card';
+                    const meta = document.createElement('p');
+                    meta.className = 'comment-meta';
+                    meta.innerText = `${comment.username} - ${comment.rating}/5`;
+                    const body = document.createElement('p');
+                    body.className = 'comment-body';
+                    body.innerText = comment.comment_text;
+                    card.appendChild(meta);
+                    card.appendChild(body);
+
+                    if (canManageComment(comment)) {
+                        const actions = document.createElement('div');
+                        actions.className = 'comment-actions';
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn btn-outline';
+                        editBtn.type = 'button';
+                        editBtn.innerText = 'Edit';
+                        editBtn.addEventListener('click', () => editComment(comment));
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn btn-outline';
+                        deleteBtn.type = 'button';
+                        deleteBtn.innerText = 'Delete';
+                        deleteBtn.addEventListener('click', () => deleteComment(comment.id));
+                        actions.appendChild(editBtn);
+                        actions.appendChild(deleteBtn);
+                        card.appendChild(actions);
+                    }
+                    commentsList.appendChild(card);
+                });
+            } catch (error) {
+                commentsList.innerHTML = `<p class="error">${error.message}</p>`;
+            }
+        }
+
+        async function postComment() {
+            if (!currentUser) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = 'Please login to post comments.';
+                return;
+            }
+            if (!activeRecipeId) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = 'Open a recipe before posting.';
+                return;
+            }
+
+            const commentText = commentInput.value.trim();
+            const rating = Number(ratingInput.value);
+            if (!commentText) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = 'Comment cannot be empty.';
+                return;
+            }
+
+            try {
+                await fetchJson(`/api/recipes/${activeRecipeId}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ commentText, rating })
+                });
+                commentInput.value = '';
+                commentMessage.className = 'message success';
+                commentMessage.innerText = 'Comment posted.';
+                loadComments(activeRecipeId);
+            } catch (error) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = error.message;
+            }
+        }
+
+        async function editComment(comment) {
+            const newText = window.prompt('Update your comment:', comment.comment_text);
+            if (newText === null) {
+                return;
+            }
+            const newRatingRaw = window.prompt('Update your rating (1-5):', String(comment.rating));
+            if (newRatingRaw === null) {
+                return;
+            }
+            const newRating = Number(newRatingRaw);
+            if (!newText.trim() || !Number.isInteger(newRating) || newRating < 1 || newRating > 5) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = 'Invalid comment or rating.';
+                return;
+            }
+
+            try {
+                await fetchJson(`/api/comments/${comment.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        commentText: newText.trim(),
+                        rating: newRating
+                    })
+                });
+                commentMessage.className = 'message success';
+                commentMessage.innerText = 'Comment updated.';
+                loadComments(activeRecipeId);
+            } catch (error) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = error.message;
+            }
+        }
+
+        async function deleteComment(commentId) {
+            const confirmed = window.confirm('Delete this comment?');
+            if (!confirmed) {
+                return;
+            }
+            try {
+                await fetchJson(`/api/comments/${commentId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                commentMessage.className = 'message success';
+                commentMessage.innerText = 'Comment deleted.';
+                loadComments(activeRecipeId);
+            } catch (error) {
+                commentMessage.className = 'message error';
+                commentMessage.innerText = error.message;
             }
         }
 
@@ -112,10 +502,23 @@
                 });
             } finally {
                 setGuestUI();
+                loadFavorites();
             }
         });
 
-        loadSession();
+        searchBtn.addEventListener('click', runSearch);
+        ingredientsInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                runSearch();
+            }
+        });
+        postCommentBtn.addEventListener('click', postComment);
+
+        (async () => {
+            await loadSessionAndUser();
+            await loadFavorites();
+        })();
     </script>
 </body>
 </html>

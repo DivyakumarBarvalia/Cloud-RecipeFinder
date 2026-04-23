@@ -183,10 +183,112 @@ header {
     margin: 0.6rem 0 1rem;
 }
 
+.search-row {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+}
+
+.search-row input {
+    flex: 1;
+    margin: 0;
+}
+
 .search-card .muted-note {
     font-size: 0.85rem;
     color: var(--text-muted);
     margin-top: 0.8rem;
+}
+
+.recipe-body {
+    padding: 0.85rem 0.9rem;
+}
+
+.recipe-title {
+    margin: 0 0 0.7rem;
+}
+
+.recipe-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.recipe-actions .btn {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+.details-card {
+    width: min(980px, calc(100% - 2rem));
+    margin: 0 auto 1.8rem;
+    background: #fff;
+    border: 1px solid #dbe7f7;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.details-card h3,
+.details-card h4 {
+    margin-top: 0;
+}
+
+#details-image {
+    width: min(100%, 460px);
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+}
+
+.details-summary {
+    color: var(--text-muted);
+}
+
+.hidden {
+    display: none;
+}
+
+#comment-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.comment-controls {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    margin-top: 0.7rem;
+}
+
+.comment-controls select {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+}
+
+.comment-card {
+    border: 1px solid #dbe7f7;
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-top: 0.7rem;
+    background: var(--bg-soft-blue);
+}
+
+.comment-meta {
+    margin: 0;
+    font-weight: 700;
+}
+
+.comment-body {
+    margin: 0.45rem 0 0;
+}
+
+.comment-actions {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.5rem;
 }
 
 .auth-page {
@@ -316,5 +418,14 @@ header {
 
     .hero h2 {
         font-size: 1.6rem;
+    }
+
+    .search-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .comment-controls {
+        flex-wrap: wrap;
     }
 }

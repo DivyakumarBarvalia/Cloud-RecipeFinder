@@ -39,54 +39,73 @@
         </div>
     </div>
 
-    <script>
-        document.querySelectorAll('.toggle-password').forEach((button) => {
-            button.addEventListener('click', () => {
-                const targetInput = document.getElementById(button.dataset.target);
-                const isPassword = targetInput.type === 'password';
-                targetInput.type = isPassword ? 'text' : 'password';
-                button.textContent = isPassword ? 'Hide' : 'Show';
+   <script>
+    // ✅ Keep password toggle feature
+    document.querySelectorAll('.toggle-password').forEach((button) => {
+        button.addEventListener('click', () => {
+            const targetInput = document.getElementById(button.dataset.target);
+            const isPassword = targetInput.type === 'password';
+            targetInput.type = isPassword ? 'text' : 'password';
+            button.textContent = isPassword ? 'Hide' : 'Show';
+        });
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const messageElement = document.getElementById('message');
+
+        // ✅ Keep password confirmation check
+        if (password !== confirmPassword) {
+            messageElement.className = 'message error';
+            messageElement.innerText = 'Passwords do not match.';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/register', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
             });
-        });
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const messageElement = document.getElementById('message');
+            const data = await response.json();
 
-            if (password !== confirmPassword) {
+            if (response.ok) {
+                // ✅ Hide form and show MFA setup
+                document.getElementById('registerForm').style.display = 'none';
+
+                messageElement.className = 'message success';
+                messageElement.innerHTML = `
+                    <h3>Registration Successful!</h3>
+                    <p><strong>Step 1:</strong> Scan this QR code with Google Authenticator or Authy</p>
+                    <img src="${data.qrCode}" alt="MFA QR Code"
+                        style="width: 200px; height: 200px; border: 2px solid #ddd; border-radius: 10px;">
+                    
+                    <p style="margin-top: 15px;">
+                        <strong>Step 2:</strong> Use the generated 6-digit code when logging in
+                    </p>
+
+                    <br>
+                    <a href="login.html"
+                        style="background: var(--primary); color: white; padding: 10px 20px;
+                        text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        Proceed to Login
+                    </a>
+                `;
+            } else {
                 messageElement.className = 'message error';
-                messageElement.innerText = 'Passwords do not match.';
-                return;
+                messageElement.innerText = data.error || 'Registration failed.';
             }
-
-            try {
-                const response = await fetch('/api/register', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    messageElement.className = 'message success';
-                    messageElement.innerText = 'Registration successful! Redirecting to login...';
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } else {
-                    messageElement.className = 'message error';
-                    messageElement.innerText = data.error || 'Registration failed.';
-                }
-            } catch (error) {
-                messageElement.className = 'message error';
-                messageElement.innerText = 'Network error. Is the backend running?';
-            }
-        });
+        } catch (error) {
+            messageElement.className = 'message error';
+            messageElement.innerText = 'Network error. Is the backend running?';
+        }
+    });
     </script>
 </body>
 </html>
