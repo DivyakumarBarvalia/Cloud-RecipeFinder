@@ -101,7 +101,7 @@ This project is deployed using **Amazon Web Services (AWS)** and follows a scala
 
 ### Load Balancing & Scaling
 
-- Load Balancer for distributing traffic across instances  
+- Application Load Balancer for distributing traffic across instances  
 
 ---
 
