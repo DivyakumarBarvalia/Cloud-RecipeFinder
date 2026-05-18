@@ -53,12 +53,11 @@ Many people struggle with deciding what to cook using the ingredients they alrea
 
 ## 🧠 APIs Used
 
-The application integrates with external recipe APIs such as:
+The application integrates with external recipe API:
 
 - Spoonacular API  
-- Edamam Recipe API  
 
-These APIs provide recipe data, ingredient matching, and nutrition information.
+This API provide recipe data, ingredient matching, and nutrition information.
 
 ---
 
